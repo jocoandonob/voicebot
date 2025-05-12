@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Testing Tool</h1>
+    
+    <div class="card">
+        <h2>Visitor Tracking</h2>
+        <button id="trackVisitorBtn">Track Visitor</button>
+        <pre id="trackVisitorResult">Results will appear here...</pre>
+    </div>
+    
+    <div class="card">
+        <h2>Usage Stats</h2>
+        <button id="getStatsBtn">Get Stats</button>
+        <pre id="getStatsResult">Results will appear here...</pre>
+    </div>
+    
+    <div class="card">
+        <h2>Button Usage</h2>
+        <button id="checkRecordBtn">Check Record</button>
+        <button id="checkSendBtn">Check Send</button>
+        <button id="checkReadBtn">Check Read</button>
+        <pre id="checkButtonResult">Results will appear here...</pre>
+    </div>
+    
+    <div class="card">
+        <h2>Increment Usage</h2>
+        <button id="incrementRecordBtn">Increment Record</button>
+        <button id="incrementSendBtn">Increment Send</button>
+        <button id="incrementReadBtn">Increment Read</button>
+        <pre id="incrementButtonResult">Results will appear here...</pre>
+    </div>
+    
+    <script>
+        // Helper to make API calls and show results
+        async function callApi(url, method = 'GET', resultElement) {
+            resultElement.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                
+                const data = await response.json();
+                resultElement.textContent = JSON.stringify(data, null, 2);
+                return data;
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                console.error(error);
+            }
+        }
+        
+        // Track visitor
+        document.getElementById('trackVisitorBtn').addEventListener('click', () => {
+            callApi('/api/voice/track-visitor', 'POST', document.getElementById('trackVisitorResult'));
+        });
+        
+        // Get stats
+        document.getElementById('getStatsBtn').addEventListener('click', () => {
+            callApi('/api/voice/stats', 'GET', document.getElementById('getStatsResult'));
+        });
+        
+        // Check button usage
+        document.getElementById('checkRecordBtn').addEventListener('click', () => {
+            callApi('/api/voice/check-button-usage/record', 'POST', document.getElementById('checkButtonResult'));
+        });
+        
+        document.getElementById('checkSendBtn').addEventListener('click', () => {
+            callApi('/api/voice/check-button-usage/send', 'POST', document.getElementById('checkButtonResult'));
+        });
+        
+        document.getElementById('checkReadBtn').addEventListener('click', () => {
+            callApi('/api/voice/check-button-usage/read', 'POST', document.getElementById('checkButtonResult'));
+        });
+        
+        // Increment button usage
+        document.getElementById('incrementRecordBtn').addEventListener('click', () => {
+            callApi('/api/voice/increment-button-usage/record', 'POST', document.getElementById('incrementButtonResult'));
+        });
+        
+        document.getElementById('incrementSendBtn').addEventListener('click', () => {
+            callApi('/api/voice/increment-button-usage/send', 'POST', document.getElementById('incrementButtonResult'));
+        });
+        
+        document.getElementById('incrementReadBtn').addEventListener('click', () => {
+            callApi('/api/voice/increment-button-usage/read', 'POST', document.getElementById('incrementButtonResult'));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Assistant</title>
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --primary-dark: #5541d7;
+            --secondary-color: #00cec9;
+            --text-color: #f1f1f1;
+            --dark-bg: #121212;
+            --dark-surface: #1e1e1e;
+            --dark-card: #2d2d2d;
+            --dark-border: #333333;
+            --light-gray: #2d2d2d;
+            --medium-gray: #444444;
+            --dark-gray: #888888;
+            --white: #f1f1f1;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --font-main: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: var(--font-main);
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--dark-bg);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--dark-surface), #000000);
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+
+        header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+            color: var(--dark-gray);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--dark-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--dark-border);
+        }
+
+        .container h2 {
+            color: var(--white);
+            margin-top: 0;
+            font-weight: 600;
+            border-bottom: 1px solid var(--dark-border);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 120px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        button:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        button:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all .3s;
+            z-index: -1;
+        }
+
+        button:hover:before {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: var(--white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #01a29a);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 206, 201, 0.3);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            color: var(--white);
+            border-color: var(--primary-color);
+            background-color: var(--primary-dark);
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 1rem;
+            border: 1px solid var(--dark-border);
+            background-color: var(--dark-surface);
+            color: var(--white);
+            border-radius: var(--border-radius);
+            font-family: var(--font-main);
+            font-size: 1rem;
+            resize: vertical;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+        }
+
+        .message-container {
+            margin: 1.5rem 0;
+            border-top: 1px solid var(--dark-border);
+            padding-top: 1.5rem;
+            max-height: 500px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--medium-gray) var(--dark-surface);
+        }
+        
+        .message-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .message-container::-webkit-scrollbar-track {
+            background: var(--dark-surface);
+            border-radius: 10px;
+        }
+        
+        .message-container::-webkit-scrollbar-thumb {
+            background: var(--medium-gray);
+            border-radius: 10px;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            padding: 1.2rem;
+            border-radius: var(--border-radius);
+            position: relative;
+            animation: fadeIn 0.3s ease-in-out;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background-color: var(--dark-surface);
+            border-left: 4px solid var(--primary-color);
+            margin-right: 20%;
+            margin-left: 5%;
+        }
+
+        .assistant-message {
+            background-color: var(--medium-gray);
+            border-left: 4px solid var(--secondary-color);
+            margin-left: 20%;
+            margin-right: 5%;
+        }
+
+        .message p {
+            margin: 0;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .message-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background-color: var(--dark-card);
+            font-size: 0.8rem;
+            padding: 0.2rem 0.7rem;
+            color: var(--secondary-color);
+            border-radius: 20px;
+            border: 1px solid var(--dark-border);
+            font-weight: 600;
+        }
+        
+        .user-message .message-label {
+            color: var(--primary-color);
+        }
+
+        .audio-player {
+            margin-top: 1rem;
+            width: 100%;
+            border-radius: 30px;
+            background-color: var(--dark-surface);
+            height: 40px;
+        }
+        
+        audio::-webkit-media-controls-panel {
+            background-color: var(--dark-surface);
+        }
+        
+        audio::-webkit-media-controls-play-button {
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        .language-selection {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .language-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--dark-surface);
+            border: 1px solid var(--dark-border);
+            border-radius: 20px;
+            color: var(--dark-gray);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .language-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+        
+        .reading-section {
+            margin-top: 1.5rem;
+        }
+        
+        .reading-section h3 {
+            color: var(--white);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .reading-text {
+            background-color: var(--dark-surface);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--dark-border);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .voice-selector {
+            margin-top: 1.5rem;
+        }
+
+        .voice-selector select {
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--dark-border);
+            background-color: var(--dark-surface);
+            color: var(--white);
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+            cursor: pointer;
+        }
+        
+        .voice-selector select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .record-indicator {
+            display: none;
+            color: var(--secondary-color);
+            font-weight: bold;
+            animation: blink 1s infinite;
+            margin-top: 0.5rem;
+        }
+        
+        .record-indicator.visible {
+            display: inline-block;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-message {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            color: var(--dark-gray);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            background-color: var(--dark-surface);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .error-message {
+            color: #e74c3c !important;
+            font-weight: bold;
+            border-left-color: #e74c3c !important;
+            background-color: rgba(231, 76, 60, 0.1) !important;
+        }
+        
+        /* Tab styles */
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            overflow: hidden;
+            background-color: var(--dark-surface);
+            padding: 5px;
+            gap: 5px;
+            border: 1px solid var(--dark-border);
+        }
+        
+        .tab {
+            padding: 1rem 2rem;
+            background-color: transparent;
+            color: var(--dark-gray);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            flex: 1;
+            border-radius: var(--border-radius);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .tab:hover {
+            color: var(--white);
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+        
+        .tab.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--white);
+            border-radius: 50%;
+            margin-bottom: 5px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* Highlighted text styles */
+        .highlight-char {
+            display: inline-block;
+            position: static; /* Prevent any layout shifts */
+            color: inherit; /* Start with the parent's color */
+            transition: color 0.2s ease; /* Only animate color changes */
+            /* Reset any properties that might cause layout shifts */
+            margin: 0;
+            padding: 0;
+            border: none; 
+            transform: none;
+            font-weight: inherit;
+            background: none;
+            height: auto;
+            width: auto;
+            cursor: pointer; /* Show pointer cursor to indicate clickable */
+            user-select: text; /* Allow text selection */
+        }
+        
+        .highlight-char.read {
+            color: var(--secondary-color);
+            /* No layout-affecting properties */
+        }
+        
+        .highlight-char.active {
+            color: var(--white);
+            text-shadow: 0 0 8px rgba(108, 92, 231, 0.8);
+            /* No layout-affecting properties like scale, padding, etc. */
+        }
+        
+        @keyframes pulse {
+            from { text-shadow: 0 0 1px rgba(108, 92, 231, 0.5); }
+            to { text-shadow: 0 0 5px rgba(108, 92, 231, 0.9); }
+        }
+        
+        /* Editable text area */
+        .reading-text {
+            background-color: var(--dark-surface);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--dark-border);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            overflow-y: auto;
+            max-height: 400px;
+            position: relative; /* Create stacking context */
+        }
+        
+        .reading-text.editable {
+            cursor: text;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.1);
+        }
+        
+        .reading-text textarea {
+            width: 100%;
+            min-height: 120px;
+            background-color: transparent;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+            color: var(--white);
+            resize: vertical;
+        }
+        
+        /* Voice selection styles */
+        .voice-avatars {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+        
+        .voice-avatar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.6;
+            width: 80px;
+        }
+        
+        .voice-avatar.active {
+            opacity: 1;
+            transform: translateY(-5px);
+        }
+        
+        .avatar-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--dark-surface);
+            border: 2px solid var(--dark-border);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .avatar-img.active {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 15px rgba(0, 206, 201, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .avatar-name {
+            font-size: 0.8rem;
+            color: var(--dark-gray);
+            text-align: center;
+        }
+        
+        /* Default avatar faces */
+        .avatar-img.male {
+            background-image: url('data:image/jpeg;base64,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');
+        }
+        
+        .avatar-img.female {
+            background-image: url('data:image/jpeg;base64,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');
+        }
+        
+        .lip-animation {
+            position: absolute;
+            bottom: 15px;
+            width: 20px;
+            height: 3px;
+            background-color: var(--white);
+            border-radius: 10px;
+            transform-origin: center;
+            animation: lip-move 0.5s infinite alternate;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .speaking .lip-animation {
+            opacity: 1;
+        }
+        
+        @keyframes lip-move {
+            0% { transform: scaleY(1); }
+            100% { transform: scaleY(3); }
+        }
+        
+        /* Language voice groups */
+        .language-voice-group {
+            margin-top: 1rem;
+            border-top: 1px solid var(--dark-border);
+            padding-top: 1rem;
+        }
+        
+        .language-voice-group h3 {
+            color: var(--white);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        footer {
+            background-color: #000;
+            color: var(--dark-gray);
+            text-align: center;
+            padding: 1rem;
+            margin-top: auto;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--dark-border);
+        }
+        
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .visitor-stats {
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--dark-border);
+            font-size: 0.85rem;
+        }
+        
+        .usage-limits {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .usage-limit {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            background-color: var(--dark-surface);
+            border: 1px solid var(--dark-border);
+        }
+        
+        .usage-limit .count {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .usage-limit.limited {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-color: #e74c3c;
+        }
+        
+        .usage-limit.limited .count {
+            color: #e74c3c;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .user-message, .assistant-message {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><span style="color: var(--primary-color);">Joco</span><span style="color: var(--secondary-color);">AI</span></h1>
+        <p>Advanced conversational AI with natural voice interaction</p>
+    </header>
+    
+    <main>
+        <div class="container">
+            <div class="tabs">
+                <div id="tab-chat" class="tab active">Voice Chat</div>
+                <div id="tab-read" class="tab">Read Text</div>
+            </div>
+            
+            <!-- Voice Chat Tab Content -->
+            <div id="chat-content" class="tab-content active">
+                <div class="controls">
+                    <div>
+                        <h2>Voice Input</h2>
+                        <div class="btn-container">
+                            <button id="startRecording" class="btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                                </svg>
+                                Start Recording
+                            </button>
+                            <button id="stopRecording" class="btn-secondary" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/>
+                                </svg>
+                                Stop Recording
+                            </button>
+                        </div>
+                        <div id="recordingIndicator" class="record-indicator">Recording...</div>
+                    </div>
+                    
+                    <div>
+                        <h2>Or Type Your Message</h2>
+                        <textarea id="textInput" placeholder="Type your message here..."></textarea>
+                        <div class="btn-container" style="justify-content: flex-end; margin-top: 1rem;">
+                            <button id="sendText" class="btn-outline">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                                </svg>
+                                Send
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="voice-selector">
+                        <h2>Choose Voice</h2>
+                        <div id="voiceAvatars" class="voice-avatars">
+                            <!-- Voice avatars will be loaded dynamically -->
+                            <div class="voice-avatar" data-voice-id="21m00Tcm4TlvDq8ikWAM">
+                                <div class="avatar-img female active">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    <div class="lip-animation"></div>
+                                </div>
+                                <div class="avatar-name">Rachel</div>
+                            </div>
+                        </div>
+                        <select id="voiceSelector" class="voice-select" style="display: none;">
+                            <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Default)</option>
+                            <!-- More voices will be loaded dynamically -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="statusMessage" class="status-message"></div>
+                
+                <h2>Conversation</h2>
+                <div id="conversationContainer" class="message-container"></div>
+            </div>
+            
+            <!-- Read Text Tab Content -->
+            <div id="read-content" class="tab-content">
+                <div class="controls">
+                    <div class="reading-section">
+                        <h2>Select Language</h2>
+                        <div class="language-selection">
+                            <div id="langEnglish" class="language-btn active" data-lang="en">English</div>
+                            <div id="langChinese" class="language-btn" data-lang="zh">Chinese</div>
+                        </div>
+                        
+                        <h3>Reading Text</h3>
+                        <div id="englishReading" class="reading-text editable">
+                            <textarea id="english-textarea">Nature has always been a source of inspiration and wonder. The rustling of leaves, the sound of flowing water, and the chirping of birds create a symphony that calms the mind. Walking through a forest, feeling the soft earth beneath your feet, and breathing in the fresh air is a profound experience that connects us to the world around us.</textarea>
+                            <div id="english-text-container" style="display: none; user-select: text;"></div>
+                        </div>
+                        
+                        <div id="chineseReading" class="reading-text editable" style="display: none;">
+                            <textarea id="chinese-textarea">自然一直是灵感和奇迹的源泉。树叶的沙沙声，流水的声音，鸟儿的啁啾声，创造了一曲安抚心灵的交响乐。走过森林，感受脚下柔软的泥土，吸入新鲜空气，是一种与周围世界联系起来的深刻体验。</textarea>
+                            <div id="chinese-text-container" style="display: none; user-select: text;"></div>
+                        </div>
+                        
+                        <div class="btn-container">
+                            <button id="readText" class="btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/>
+                                    <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/>
+                                    <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7.22 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.585-1.89a.5.5 0 0 1 .307-.11z"/>
+                                </svg>
+                                Read Text
+                            </button>
+                            <button id="pauseReading" class="btn-secondary" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5 3.5A1.5 1.5 0 0 1 6.5 2h3A1.5 1.5 0 0 1 11 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 5 12.5v-9z"/>
+                                </svg>
+                                Pause
+                            </button>
+                            <button id="resumeReading" class="btn-outline" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                                </svg>
+                                Resume
+                            </button>
+                        </div>
+                        
+                        <div class="voice-selector">
+                            <h2>Choose Voice</h2>
+                            
+                            <!-- English Voices -->
+                            <div id="english-voices" class="language-voice-group">
+                                <h3>English Voices</h3>
+                                <div id="readTextVoiceAvatarsEn" class="voice-avatars">
+                                    <!-- English Voice avatars will be loaded dynamically -->
+                                    <div class="voice-avatar" data-voice-id="21m00Tcm4TlvDq8ikWAM">
+                                        <div class="avatar-img female active">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="12" cy="7" r="4"></circle>
+                                            </svg>
+                                        </div>
+                                        <div class="avatar-name">Rachel</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Chinese Voices -->
+                            <div id="chinese-voices" class="language-voice-group" style="display: none;">
+                                <h3>Chinese Voices</h3>
+                                <div id="readTextVoiceAvatarsZh" class="voice-avatars">
+                                    <!-- Chinese Voice avatars will be loaded dynamically -->
+                                </div>
+                            </div>
+                            
+                            <select id="readTextVoiceSelector" class="voice-select" style="display: none;">
+                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Default)</option>
+                                <!-- More voices will be loaded dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="readStatusMessage" class="status-message"></div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 <span style="color: var(--primary-color);">Joco</span><span style="color: var(--secondary-color);">AI</span> | Powered by OpenAI & ElevenLabs</p>
+            <div class="visitor-stats">
+                <p>Total Visitors: <span id="total-visitors">0</span> | Total Uses: <span id="total-uses">0</span></p>
+                <div class="usage-limits">
+                    <span id="record-limit" class="usage-limit">Recording: <span class="count">0</span>/5</span>
+                    <span id="send-limit" class="usage-limit">Send: <span class="count">0</span>/5</span>
+                    <span id="read-limit" class="usage-limit">Read: <span class="count">0</span>/5</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startRecordingBtn = document.getElementById('startRecording');
+            const stopRecordingBtn = document.getElementById('stopRecording');
+            const recordingIndicator = document.getElementById('recordingIndicator');
+            const textInput = document.getElementById('textInput');
+            const sendTextBtn = document.getElementById('sendText');
+            const voiceSelector = document.getElementById('voiceSelector');
+            const readTextVoiceSelector = document.getElementById('readTextVoiceSelector');
+            const conversationContainer = document.getElementById('conversationContainer');
+            const statusMessage = document.getElementById('statusMessage');
+            const readStatusMessage = document.getElementById('readStatusMessage');
+            
+            // Language buttons
+            const langEnglishBtn = document.getElementById('langEnglish');
+            const langChineseBtn = document.getElementById('langChinese');
+            const englishReading = document.getElementById('englishReading');
+            const chineseReading = document.getElementById('chineseReading');
+            
+            // Usage tracking elements
+            const totalVisitorsElement = document.getElementById('total-visitors');
+            const totalUsesElement = document.getElementById('total-uses');
+            const recordLimitElement = document.getElementById('record-limit');
+            const sendLimitElement = document.getElementById('send-limit');
+            const readLimitElement = document.getElementById('read-limit');
+            
+            // Button usage limits
+            let recordButtonRemaining = 5;
+            let sendButtonRemaining = 5;
+            let readButtonRemaining = 5;
+            
+            // Track visitor on page load
+            trackVisitor();
+            
+            // Get usage stats
+            getUsageStats();
+            
+            // Check button usage limits
+            checkButtonUsage('record');
+            checkButtonUsage('send');
+            checkButtonUsage('read');
+            const readTextBtn = document.getElementById('readText');
+            const pauseReadingBtn = document.getElementById('pauseReading');
+            const resumeReadingBtn = document.getElementById('resumeReading');
+            const tabChat = document.getElementById('tab-chat');
+            const tabRead = document.getElementById('tab-read');
+            const chatContent = document.getElementById('chat-content');
+            const readContent = document.getElementById('read-content');
+            
+            // English and Chinese text
+            const englishText = "Nature has always been a source of inspiration and wonder. The rustling of leaves, the sound of flowing water, and the chirping of birds create a symphony that calms the mind. Walking through a forest, feeling the soft earth beneath your feet, and breathing in the fresh air is a profound experience that connects us to the world around us.";
+            const chineseText = "自然一直是灵感和奇迹的源泉。树叶的沙沙声，流水的声音，鸟儿的啁啾声，创造了一曲安抚心灵的交响乐。走过森林，感受脚下柔软的泥土，吸入新鲜空气，是一种与周围世界联系起来的深刻体验。";
+            
+            let mediaRecorder;
+            let audioChunks = [];
+            let conversationHistory = [];
+            let currentLanguage = 'en';
+            let isProcessing = false;
+            let currentAudio = null;
+            let currentWordIndex = 0;
+            let wordElements = [];
+            let highlightInterval = null;
+            
+            // Initialize text containers with highlighted words
+            const englishTextContainer = document.getElementById('english-text-container');
+            const chineseTextContainer = document.getElementById('chinese-text-container');
+            
+            // Tab switching
+            tabChat.addEventListener('click', () => {
+                switchTab('chat');
+            });
+            
+            tabRead.addEventListener('click', () => {
+                switchTab('read');
+            });
+            
+            function switchTab(tabName) {
+                if (tabName === 'chat') {
+                    tabChat.classList.add('active');
+                    tabRead.classList.remove('active');
+                    chatContent.classList.add('active');
+                    readContent.classList.remove('active');
+                } else {
+                    tabChat.classList.remove('active');
+                    tabRead.classList.add('active');
+                    chatContent.classList.remove('active');
+                    readContent.classList.add('active');
+                }
+            }
+            
+            // Initialize highlighted characters
+            function initializeHighlightedChars() {
+                const englishTextarea = document.getElementById('english-textarea');
+                const chineseTextarea = document.getElementById('chinese-textarea');
+                
+                const englishText = englishTextarea.value;
+                const chineseText = chineseTextarea.value;
+                
+                // English text - preserve spaces and original formatting
+                let englishHtml = '';
+                let charIndex = 0;
+                
+                // Process each character individually but preserve spaces
+                for (let i = 0; i < englishText.length; i++) {
+                    const char = englishText[i];
+                    
+                    if (char === ' ') {
+                        // Preserve spaces as regular spaces, not highlighted characters
+                        englishHtml += ' ';
+                    } else if (char === '\n') {
+                        // Preserve line breaks
+                        englishHtml += '<br>';
+                    } else {
+                        // Wrap actual characters in spans for highlighting
+                        englishHtml += `<span class="highlight-char" data-index="${charIndex}">${char}</span>`;
+                        charIndex++;
+                    }
+                }
+                
+                englishTextContainer.innerHTML = englishHtml;
+                
+                // Chinese text - preserve spaces and original formatting
+                let chineseHtml = '';
+                charIndex = 0;
+                
+                // Process each character individually but preserve spaces
+                for (let i = 0; i < chineseText.length; i++) {
+                    const char = chineseText[i];
+                    
+                    if (char === ' ') {
+                        // Preserve spaces as regular spaces, not highlighted characters
+                        chineseHtml += ' ';
+                    } else if (char === '\n') {
+                        // Preserve line breaks
+                        chineseHtml += '<br>';
+                    } else {
+                        // Wrap actual characters in spans for highlighting
+                        chineseHtml += `<span class="highlight-char" data-index="${charIndex}">${char}</span>`;
+                        charIndex++;
+                    }
+                }
+                
+                chineseTextContainer.innerHTML = chineseHtml;
+                
+                // Hide textareas, show character containers
+                englishTextarea.style.display = 'none';
+                chineseTextarea.style.display = 'none';
+                englishTextContainer.style.display = 'block';
+                chineseTextContainer.style.display = 'block';
+                
+                // Remove editable class
+                englishReading.classList.remove('editable');
+                chineseReading.classList.remove('editable');
+            }
+            
+            // Function to show text input fields
+            function showTextInputs() {
+                const englishTextarea = document.getElementById('english-textarea');
+                const chineseTextarea = document.getElementById('chinese-textarea');
+                
+                // Show textareas, hide character containers
+                englishTextarea.style.display = 'block';
+                chineseTextarea.style.display = 'block';
+                englishTextContainer.style.display = 'none';
+                chineseTextContainer.style.display = 'none';
+                
+                // Add editable class
+                englishReading.classList.add('editable');
+                chineseReading.classList.add('editable');
+            }
+            
+            // Load available voices from ElevenLabs
+            fetchVoices();
+            showTextInputs(); // Start with editable text
+            
+            // Update selected voice display
+            function updateSelectedVoiceDisplay() {
+                const activeVoiceAvatar = document.querySelector('#readTextVoiceAvatars .avatar-img.active');
+                if (!activeVoiceAvatar) return;
+                
+                const container = document.querySelector('.selected-avatar-container');
+                container.innerHTML = '';
+                
+                // Create a copy of the selected voice avatar
+                const selectedAvatar = document.createElement('div');
+                selectedAvatar.className = 'selected-avatar ' + (activeVoiceAvatar.classList.contains('female') ? 'female' : 'male');
+                selectedAvatar.style.backgroundImage = activeVoiceAvatar.style.backgroundImage || window.getComputedStyle(activeVoiceAvatar).backgroundImage;
+                
+                // Add lip animation
+                const lipAnim = document.createElement('div');
+                lipAnim.className = 'lip-animation';
+                selectedAvatar.appendChild(lipAnim);
+                
+                container.appendChild(selectedAvatar);
+            }
+            
+            // Language selection handlers
+            langEnglishBtn.addEventListener('click', () => {
+                setLanguage('en');
+            });
+            
+            langChineseBtn.addEventListener('click', () => {
+                setLanguage('zh');
+                
+                // Select native Chinese voice by default when switching to Chinese
+                // Look for Sunny or other dedicated Chinese voice
+                const chineseVoiceIds = [
+                    'Bv3CEu7KgkjrjE6vEBTD', // Sunny (Native Chinese)
+                    'UXEhvYcw1xBk259dhqsC', // Yang (Chinese)
+                    'qkLfVn2C3FmABrEomFr7', // Lei (Chinese)
+                    'g49DNe3zwOUBMXRLtEKV'  // Jia (Chinese)
+                ];
+                
+                // Try to find one of these voices
+                for (let i = 0; i < readTextVoiceSelector.options.length; i++) {
+                    if (chineseVoiceIds.includes(readTextVoiceSelector.options[i].value)) {
+                        readTextVoiceSelector.selectedIndex = i;
+                        // Also update the avatar selection
+                        const selectedVoiceId = readTextVoiceSelector.value;
+                        const avatars = document.querySelectorAll('#readTextVoiceAvatars .voice-avatar');
+                        avatars.forEach(avatar => {
+                            if (avatar.dataset.voiceId === selectedVoiceId) {
+                                avatar.click();
+                            }
+                        });
+                        break;
+                    }
+                }
+            });
+            
+            // Set active language
+            function setLanguage(lang) {
+                currentLanguage = lang;
+                
+                // Update UI
+                if (lang === 'en') {
+                    langEnglishBtn.classList.add('active');
+                    langChineseBtn.classList.remove('active');
+                    englishReading.style.display = 'block';
+                    chineseReading.style.display = 'none';
+                    
+                    // Show English voices, hide Chinese voices
+                    document.getElementById('english-voices').style.display = 'block';
+                    document.getElementById('chinese-voices').style.display = 'none';
+                    
+                    // Default to Rachel for English
+                    switchToEnglishVoice();
+                } else {
+                    langEnglishBtn.classList.remove('active');
+                    langChineseBtn.classList.add('active');
+                    englishReading.style.display = 'none';
+                    chineseReading.style.display = 'block';
+                    
+                    // Show Chinese voices, hide English voices
+                    document.getElementById('english-voices').style.display = 'none';
+                    document.getElementById('chinese-voices').style.display = 'block';
+                    
+                    // Switch to a native Chinese voice
+                    switchToChineseVoice();
+                }
+                
+                // Use complete reset for language changes
+                completeReset();
+            }
+            
+            // Function to switch to a Chinese voice
+            function switchToChineseVoice() {
+                // Prioritized list of RELIABLE Chinese voices that we've verified work
+                // Using too many specialized voices with the trial API key can cause errors
+                const chineseVoiceIds = [
+                    '21m00Tcm4TlvDq8ikWAM', // Rachel - universal fallback that always works
+                    'EXAVITQu4vr4xnSDxMaL', // Sarah (Multilingual)
+                    'onwK4e9ZLuTAKqWW03F9'  // Adam (Multilingual)
+                ];
+                
+                // First try direct voice IDs
+                for (const voiceId of chineseVoiceIds) {
+                    const option = Array.from(readTextVoiceSelector.options)
+                        .find(opt => opt.value === voiceId);
+                    
+                    if (option) {
+                        readTextVoiceSelector.value = voiceId;
+                        
+                        // Update the avatar selection too
+                        const chineseAvatars = document.querySelectorAll('#readTextVoiceAvatarsZh .voice-avatar');
+                        chineseAvatars.forEach(avatar => {
+                            const isMatch = avatar.dataset.voiceId === voiceId;
+                            const avatarImg = avatar.querySelector('.avatar-img');
+                            if (isMatch) {
+                                avatarImg.classList.add('active');
+                            } else {
+                                avatarImg.classList.remove('active');
+                            }
+                        });
+                        
+                        console.log(`Switched to Chinese voice: ${option.textContent}`);
+                        return;
+                    }
+                }
+                
+                // If no specific voice found, try any voice with Chinese in the name
+                for (let i = 0; i < readTextVoiceSelector.options.length; i++) {
+                    const option = readTextVoiceSelector.options[i];
+                    if (option.textContent.toLowerCase().includes('chinese') ||
+                        option.textContent.toLowerCase().includes('mandarin')) {
+                        readTextVoiceSelector.selectedIndex = i;
+                        return;
+                    }
+                }
+            }
+            
+            // Function to switch to an English voice (Rachel)
+            function switchToEnglishVoice() {
+                // Default to Rachel
+                const rachelId = '21m00Tcm4TlvDq8ikWAM';
+                
+                const option = Array.from(readTextVoiceSelector.options)
+                    .find(opt => opt.value === rachelId);
+                
+                if (option) {
+                    readTextVoiceSelector.value = rachelId;
+                    
+                    // Update the avatar selection
+                    const englishAvatars = document.querySelectorAll('#readTextVoiceAvatarsEn .voice-avatar');
+                    englishAvatars.forEach(avatar => {
+                        const isMatch = avatar.dataset.voiceId === rachelId;
+                        const avatarImg = avatar.querySelector('.avatar-img');
+                        if (isMatch) {
+                            avatarImg.classList.add('active');
+                        } else {
+                            avatarImg.classList.remove('active');
+                        }
+                    });
+                    
+                    console.log(`Switched to English voice: ${option.textContent}`);
+                }
+            }
+            
+            // Read text button handler
+            readTextBtn.addEventListener('click', async () => {
+                if (isProcessing) return;
+                
+                // Check if reading is allowed based on usage limits
+                const allowed = await checkButtonUsage('read');
+                if (!allowed) {
+                    showReadStatus('You have reached the usage limit for text reading', true);
+                    return;
+                }
+                
+                // Get text from appropriate textarea
+                const textToRead = currentLanguage === 'en' 
+                    ? document.getElementById('english-textarea').value 
+                    : document.getElementById('chinese-textarea').value;
+                
+                // Check if text is empty
+                if (!textToRead.trim()) {
+                    showReadStatus('Please enter some text to read.', true);
+                    return;
+                }
+                
+                // Increment usage counter
+                await incrementButtonUsage('read');
+                
+                resetHighlighting();
+                
+                try {
+                    isProcessing = true;
+                    // Update button to show loading state and show message below button
+                    showReadStatus('Converting text to speech...');
+                    
+                    await startTextToSpeech(textToRead);
+                    pauseReadingBtn.style.display = 'flex';
+                    readTextBtn.style.display = 'none';
+                    
+                    // Clear status message when successful
+                    showReadStatus('');
+                } catch (error) {
+                    console.error('Error in text-to-speech:', error);
+                    
+                    // Show a more detailed error message
+                    let errorMessage = 'Error converting text to speech. Please try again.';
+                    
+                    // Check for API key related errors
+                    if (error.message && (
+                        error.message.includes('API key') || 
+                        error.message.includes('Unauthorized') ||
+                        error.message.includes('401') ||
+                        error.message.includes('403')
+                    )) {
+                        errorMessage = 'ElevenLabs API key is missing or invalid. Please check your API key.';
+                    }
+                    
+                    // Show error message below the button
+                    showReadStatus(errorMessage, true);
+                } finally {
+                    isProcessing = false;
+                }
+            });
+            
+            // Variables to store playback state
+            let audioCurrentTime = 0;
+            let pausedCharIndex = 0;
+            
+            // Pause reading button handler
+            pauseReadingBtn.addEventListener('click', () => {
+                if (currentAudio) {
+                    // Save current audio position
+                    audioCurrentTime = currentAudio.currentTime;
+                    pausedCharIndex = currentWordIndex;
+                    
+                    // Pause audio and animation
+                    currentAudio.pause();
+                    pauseReadingBtn.style.display = 'none';
+                    resumeReadingBtn.style.display = 'flex';
+                    
+                    // Cancel animation but don't reset
+                    if (highlightInterval) {
+                        cancelAnimationFrame(highlightInterval);
+                        highlightInterval = null;
+                    }
+                    
+                    console.log(`Paused at audio time: ${audioCurrentTime}s, character index: ${pausedCharIndex}`);
+                }
+            });
+            
+            // Resume reading button handler
+            resumeReadingBtn.addEventListener('click', () => {
+                if (currentAudio) {
+                    try {
+                        // Set audio back to saved position
+                        currentAudio.currentTime = audioCurrentTime;
+                        
+                        // Resume audio
+                        currentAudio.play();
+                        
+                        // Update UI
+                        resumeReadingBtn.style.display = 'none';
+                        pauseReadingBtn.style.display = 'flex';
+                        
+                        // Resume animation from saved index
+                        currentWordIndex = pausedCharIndex;
+                        
+                        // Get characters to highlight again
+                        const chars = (currentLanguage === 'en') 
+                            ? document.querySelectorAll('#english-text-container .highlight-char')
+                            : document.querySelectorAll('#chinese-text-container .highlight-char');
+                        
+                        // First just update the display to show highlighted text up to current position
+                        for (let i = 0; i < chars.length; i++) {
+                            if (i <= pausedCharIndex) {
+                                chars[i].classList.add('read');
+                            }
+                            if (i === pausedCharIndex) {
+                                chars[i].classList.add('active');
+                            }
+                        }
+                        
+                        // Then restart the animation from current point
+                        const audioLength = currentAudio.duration * 1000; // in milliseconds
+                        const elapsedTime = audioCurrentTime * 1000;
+                        const progress = elapsedTime / audioLength;
+                        const startTime = performance.now() - (progress * audioLength);
+                        
+                        let previousTimestamp = null;
+                        let isAnimating = true;
+                        
+                        const animate = (timestamp) => {
+                            if (!isAnimating) return;
+                            
+                            // Throttle to maintain consistent animation speed
+                            if (previousTimestamp && timestamp - previousTimestamp < 16) {
+                                highlightInterval = requestAnimationFrame(animate);
+                                return;
+                            }
+                            
+                            previousTimestamp = timestamp;
+                            
+                            // Calculate time elapsed since beginning (adjusted for current position)
+                            const elapsed = timestamp - startTime;
+                            const adjustedProgress = Math.min(elapsed / audioLength, 1);
+                            const charIndex = Math.min(Math.floor(adjustedProgress * chars.length), chars.length - 1);
+                            
+                            if (currentWordIndex !== charIndex) {
+                                currentWordIndex = charIndex;
+                                highlightChar(currentWordIndex, chars);
+                            }
+                            
+                            if (adjustedProgress < 1) {
+                                highlightInterval = requestAnimationFrame(animate);
+                            } else {
+                                isAnimating = false;
+                                showTextInputs();
+                            }
+                        };
+                        
+                        // Start animation
+                        highlightInterval = requestAnimationFrame(animate);
+                        
+                        console.log(`Resumed from audio time: ${audioCurrentTime}s, character index: ${pausedCharIndex}`);
+                    } catch (err) {
+                        console.error('Error resuming audio:', err);
+                        updateStatus('Error resuming audio playback. Please try again.', true);
+                    }
+                }
+            });
+            
+            // Reset highlighting
+            function resetHighlighting() {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+                
+                if (highlightInterval) {
+                    cancelAnimationFrame(highlightInterval);
+                    highlightInterval = null;
+                }
+                currentWordIndex = 0;
+                
+                // Reset all word highlights but keep 'read' state
+                const container = currentLanguage === 'en' ? englishTextContainer : chineseTextContainer;
+                const words = container.querySelectorAll('.highlight-word');
+                
+                words.forEach(word => {
+                    word.classList.remove('active');
+                });
+                
+
+                
+                // Reset buttons
+                readTextBtn.style.display = 'flex';
+                pauseReadingBtn.style.display = 'none';
+                resumeReadingBtn.style.display = 'none';
+                
+                showReadStatus('');
+            }
+            
+            // Complete reset for language change
+            function completeReset() {
+                resetHighlighting();
+                
+                // Also reset read states
+                const words = document.querySelectorAll('.highlight-word');
+                words.forEach(word => {
+                    word.classList.remove('read');
+                });
+            }
+            
+            // Add click event listeners to text containers for seeking
+            englishTextContainer.addEventListener('click', handleTextClick);
+            chineseTextContainer.addEventListener('click', handleTextClick);
+            
+            // Function to handle clicks on text to seek to position
+            function handleTextClick(event) {
+                // Only respond to clicks if audio is playing or paused (not if no audio loaded)
+                if (!currentAudio) return;
+                
+                // Check if clicked on a character
+                if (event.target.classList.contains('highlight-char')) {
+                    const clickedIndex = parseInt(event.target.dataset.index);
+                    
+                    // If valid index was found
+                    if (!isNaN(clickedIndex)) {
+                        // Determine if we need to pause first
+                        const wasPaused = currentAudio.paused;
+                        
+                        // Always pause before seeking
+                        currentAudio.pause();
+                        
+                        // Calculate new audio position
+                        const audioLength = currentAudio.duration;
+                        const newPosition = (clickedIndex / wordElements.length) * audioLength;
+                        
+                        // Set new positions
+                        currentWordIndex = clickedIndex;
+                        audioCurrentTime = newPosition;
+                        currentAudio.currentTime = newPosition;
+                        
+                        // Update highlighting to show new position
+                        const chars = (currentLanguage === 'en') 
+                            ? document.querySelectorAll('#english-text-container .highlight-char')
+                            : document.querySelectorAll('#chinese-text-container .highlight-char');
+                        
+                        // Reset all characters
+                        chars.forEach(char => {
+                            char.classList.remove('active');
+                        });
+                        
+                        // Apply highlighting up to clicked position
+                        for (let i = 0; i < chars.length; i++) {
+                            if (i <= clickedIndex) {
+                                chars[i].classList.add('read');
+                            } else {
+                                chars[i].classList.remove('read');
+                            }
+                            
+                            if (i === clickedIndex) {
+                                chars[i].classList.add('active');
+                            }
+                        }
+                        
+                        console.log(`Jumped to position: ${newPosition.toFixed(2)}s, character index: ${clickedIndex}`);
+                        
+                        // If it wasn't paused before, resume playing from new position
+                        if (!wasPaused) {
+                            // Resume audio
+                            currentAudio.play();
+                            
+                            // Cancel any existing animation
+                            if (highlightInterval) {
+                                cancelAnimationFrame(highlightInterval);
+                                highlightInterval = null;
+                            }
+                            
+                            // Resume highlighting animation from new position
+                            const startTime = performance.now() - (newPosition * 1000);
+                            let previousTimestamp = null;
+                            let isAnimating = true;
+                            
+                            const animate = (timestamp) => {
+                                if (!isAnimating) return;
+                                
+                                // Throttle to maintain consistent animation speed
+                                if (previousTimestamp && timestamp - previousTimestamp < 16) {
+                                    highlightInterval = requestAnimationFrame(animate);
+                                    return;
+                                }
+                                
+                                previousTimestamp = timestamp;
+                                
+                                // Calculate time elapsed since beginning (adjusted for current position)
+                                const elapsed = timestamp - startTime;
+                                const audioLength = currentAudio.duration * 1000; // in milliseconds
+                                const adjustedProgress = Math.min(elapsed / audioLength, 1);
+                                const charIndex = Math.min(Math.floor(adjustedProgress * chars.length), chars.length - 1);
+                                
+                                if (currentWordIndex !== charIndex) {
+                                    currentWordIndex = charIndex;
+                                    highlightChar(currentWordIndex, chars);
+                                }
+                                
+                                if (adjustedProgress < 1) {
+                                    highlightInterval = requestAnimationFrame(animate);
+                                } else {
+                                    isAnimating = false;
+                                    showTextInputs();
+                                }
+                            };
+                            
+                            // Start animation from new position
+                            highlightInterval = requestAnimationFrame(animate);
+                            
+                            // Make sure UI is correct
+                            pauseReadingBtn.style.display = 'flex';
+                            resumeReadingBtn.style.display = 'none';
+                        } else {
+                            // If it was paused, update the UI to show pause state
+                            pauseReadingBtn.style.display = 'none';
+                            resumeReadingBtn.style.display = 'flex';
+                        }
+                    }
+                }
+            }
+            
+            // Start text-to-speech with word highlighting
+            async function startTextToSpeech(text) {
+                try {
+                    // Status is now shown on the button directly
+                    
+                    const response = await fetch('/api/voice/text-to-speech', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: text,
+                            voice_id: readTextVoiceSelector.value
+                        })
+                    });
+                    
+                    // Better error handling with response details when available
+                    if (!response.ok) {
+                        let errorDetail = 'Failed to convert text to speech';
+                        
+                        try {
+                            // Try to get detailed error message from response
+                            const errorData = await response.json();
+                            if (errorData && errorData.detail) {
+                                errorDetail = errorData.detail;
+                            }
+                        } catch (e) {
+                            // If we can't parse the JSON, use status text
+                            errorDetail = response.statusText || errorDetail;
+                        }
+                        
+                        throw new Error(errorDetail);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Create and play audio
+                    currentAudio = new Audio(data.audio_url);
+                    
+                    // When audio finishes
+                    currentAudio.addEventListener('ended', () => {
+                        resetHighlighting();
+                    });
+                    
+                    // Start playing
+                    await currentAudio.play();
+                    
+                    // Get words to highlight
+                    const container = currentLanguage === 'en' ? englishTextContainer : chineseTextContainer;
+                    wordElements = container.querySelectorAll('.highlight-word');
+                    
+                    // Start word highlighting
+                    startHighlightingWords();
+                    
+                    // Clear any error messages
+                    showReadStatus('');
+                } catch (error) {
+                    console.error('Error converting text to speech:', error);
+                    
+                    // Show detailed error message
+                    let errorMessage = 'Error converting text to speech. Please try again.';
+                    if (error.message && error.message.includes('API key')) {
+                        errorMessage = 'ElevenLabs API key is missing or invalid. Please check your API key.';
+                    }
+                    
+                    showReadStatus(errorMessage, true);
+                    throw error;
+                }
+            }
+            
+            // Start character-by-character highlighting during reading
+            
+            // Character highlighting function - defined at the top level for accessibility
+            function highlightChar(index, charElements) {
+                // Get the characters to highlight if not provided
+                const chars = charElements || (currentLanguage === 'en' 
+                    ? document.querySelectorAll('#english-text-container .highlight-char')
+                    : document.querySelectorAll('#chinese-text-container .highlight-char'));
+                
+                // Use a single animation frame for all DOM updates to avoid excessive reflows
+                requestAnimationFrame(() => {
+                    // Find current active char (if any)
+                    const activeChar = document.querySelector('.highlight-char.active');
+                    if (activeChar) {
+                        activeChar.classList.remove('active');
+                    }
+                    
+                    // Highlight all characters up to the current index
+                    for (let i = 0; i < chars.length; i++) {
+                        if (i <= index) {
+                            chars[i].classList.add('read');
+                        }
+                        
+                        // Add active class just to the current character
+                        if (i === index) {
+                            chars[i].classList.add('active');
+                            
+                            // Scroll into view occasionally
+                            if (index % 10 === 0) {
+                                const container = currentLanguage === 'en' ? 
+                                    englishTextContainer : chineseTextContainer;
+                                
+                                // Check if char is visible without causing reflow
+                                const charRect = chars[i].getBoundingClientRect();
+                                const containerRect = container.getBoundingClientRect();
+                                
+                                // If character is not fully visible, scroll to it
+                                if (charRect.bottom > containerRect.bottom || charRect.top < containerRect.top) {
+                                    chars[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // The resumeHighlightingFromIndex functionality is now moved directly into 
+            // the resumeReadingBtn click handler for better synchronization
+            
+            function startHighlightingWords() {
+                if (highlightInterval) {
+                    cancelAnimationFrame(highlightInterval);
+                    highlightInterval = null;
+                }
+                
+                // Switch to text container view if in edit mode
+                if (document.getElementById('english-textarea').style.display !== 'none') {
+                    initializeHighlightedChars();
+                }
+                
+                // Get the characters to highlight
+                const chars = (currentLanguage === 'en') 
+                    ? document.querySelectorAll('#english-text-container .highlight-char')
+                    : document.querySelectorAll('#chinese-text-container .highlight-char');
+                
+                wordElements = chars; // Store for other functions to use
+                
+                if (!chars.length || !currentAudio) return;
+                
+                // Calculate timing for smooth highlighting
+                const audioLength = currentAudio.duration * 1000; // in milliseconds
+                
+                // Start highlighting from the first character
+                currentWordIndex = 0;
+                highlightChar(currentWordIndex, chars);
+                
+                // Set up animation parameters
+                const startTime = performance.now();
+                let previousTimestamp = null;
+                let isAnimating = true;
+                
+                const animate = (timestamp) => {
+                    if (!isAnimating) return;
+                    
+                    // Throttle to avoid excessive reflows and maintain consistent animation speed
+                    if (previousTimestamp && timestamp - previousTimestamp < 16) { // ~60fps
+                        highlightInterval = requestAnimationFrame(animate);
+                        return;
+                    }
+                    
+                    previousTimestamp = timestamp;
+                    
+                    // Calculate progress based on elapsed time and audio duration
+                    const elapsed = timestamp - startTime;
+                    const audioLength = currentAudio.duration * 1000; // in milliseconds
+                    const progress = Math.min(elapsed / audioLength, 1);
+                    const charIndex = Math.min(Math.floor(progress * chars.length), chars.length - 1);
+                    
+                    if (currentWordIndex !== charIndex) {
+                        currentWordIndex = charIndex;
+                        highlightChar(currentWordIndex, chars);
+                    }
+                    
+                    if (progress < 1) {
+                        // Continue animation
+                        highlightInterval = requestAnimationFrame(animate);
+                    } else {
+                        // Animation complete
+                        isAnimating = false;
+                        showTextInputs();
+                    }
+                };
+                
+                // Start the animation
+                highlightInterval = requestAnimationFrame(animate);
+            }
+            
+            async function fetchVoices() {
+                try {
+                    showLoading('Loading available voices...');
+                    const response = await fetch('/api/voice/voices');
+                    if (!response.ok) throw new Error('Failed to fetch voices');
+                    
+                    const data = await response.json();
+                    populateVoiceSelectors(data.voices);
+                    updateStatus('');
+                } catch (error) {
+                    console.error('Error fetching voices:', error);
+                    updateStatus('Could not load voices. Using default voice.', true);
+                }
+            }
+            
+            function populateVoiceSelectors(voices) {
+                // Filter voices by language
+                const englishVoices = [];
+                const chineseVoices = [];
+                const voiceChatVoices = [];
+                
+                // Add default Rachel voice to all categories
+                const rachelVoice = { voice_id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel (Default)' };
+                englishVoices.push(rachelVoice);
+                voiceChatVoices.push(rachelVoice);
+                
+                // Sort additional voices by language
+                if (voices && Array.isArray(voices)) {
+                    voices.forEach(voice => {
+                        if (voice.voice_id !== '21m00Tcm4TlvDq8ikWAM') {
+                            // Add to voice chat list
+                            voiceChatVoices.push(voice);
+                            
+                            // Check if the voice name suggests Chinese/Asian language capability
+                            const nameLower = voice.name.toLowerCase();
+                            const isChinese = 
+                                // Explicit language mentions
+                                nameLower.includes('chinese') || 
+                                nameLower.includes('mandarin') || 
+                                nameLower.includes('cantonese') ||
+                                // Common Chinese/Asian names in ElevenLabs voices
+                                nameLower.includes('jia') ||
+                                nameLower.includes('yang') || 
+                                nameLower.includes('lei') ||
+                                nameLower.includes('li ') ||
+                                nameLower.includes('chen') ||
+                                nameLower.includes('zhang') ||
+                                nameLower.includes('asian') ||
+                                // Explicitly marked multilingual voices
+                                (nameLower.includes('multilingual') && 
+                                 !nameLower.includes('english only'));
+                            
+                            if (isChinese) {
+                                chineseVoices.push(voice);
+                            } else {
+                                englishVoices.push(voice);
+                            }
+                        }
+                    });
+                }
+                
+                // Always include several dedicated Chinese voices that work well
+                // Use only voices that are confirmed to work with Chinese text
+                const defaultChineseVoices = [
+                    // Starting with default voice (Rachel) which is universal and always works
+                    { voice_id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel (Universal Voice)' },
+                    
+                    // Add a small selection of verified multilingual voices that work well
+                    // Adding too many causes issues due to API key limitations
+                    { voice_id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah (Multilingual)' },
+                    { voice_id: 'onwK4e9ZLuTAKqWW03F9', name: 'Adam (Multilingual)' }
+                ];
+                
+                // Add these default Chinese voices if they don't exist in the current selection
+                defaultChineseVoices.forEach(defaultVoice => {
+                    if (!chineseVoices.some(v => v.voice_id === defaultVoice.voice_id)) {
+                        chineseVoices.unshift(defaultVoice);
+                    }
+                });
+                
+                // Function to populate a voice selector with avatars
+                function populateAvatars(avatarsContainer, selectElement, voiceList) {
+                    // Skip if container doesn't exist
+                    if (!avatarsContainer) return;
+                    
+                    avatarsContainer.innerHTML = ''; // Clear existing avatars
+                    
+                    // For the read text voice selector, we need to be careful about
+                    // not clearing the selector multiple times since we're using the same selector
+                    // for both English and Chinese voices
+                    const isEnglishAvatars = avatarsContainer.id === 'readTextVoiceAvatarsEn';
+                    const isChineseAvatars = avatarsContainer.id === 'readTextVoiceAvatarsZh';
+                    
+                    // Only clear the options when populating the selector for the first time
+                    // or when switching languages
+                    if (selectElement === readTextVoiceSelector && isEnglishAvatars) {
+                        // We clear the entire selector for English because it's loaded first
+                        // The Chinese voices will be added later without clearing
+                        selectElement.innerHTML = '';
+                    }
+                    
+                    // Add voices to container
+                    voiceList.forEach((voice, index) => {
+                        // Determine gender based on voice name or properties
+                        const gender = determineGender(voice.name);
+                        
+                        // Create avatar
+                        const avatar = createVoiceAvatar(voice.voice_id, voice.name, gender);
+                        
+                        // Set first voice as active for this container
+                        if (index === 0) {
+                            avatar.querySelector('.avatar-img').classList.add('active');
+                        }
+                        
+                        avatarsContainer.appendChild(avatar);
+                        
+                        // Update the voice selector dropdown based on which avatars we're showing
+                        if (selectElement === readTextVoiceSelector) {
+                            // For Chinese voices, make sure we only add them if they're not already in the list
+                            if (isChineseAvatars) {
+                                // Only add the option if it doesn't already exist
+                                if (!Array.from(selectElement.options).some(opt => opt.value === voice.voice_id)) {
+                                    const option = document.createElement('option');
+                                    option.value = voice.voice_id;
+                                    option.textContent = voice.name;
+                                    option.dataset.language = 'zh';
+                                    
+                                    // Set a few key Chinese voices selected by default when in Chinese tab
+                                    const defaultChineseIds = ['Bv3CEu7KgkjrjE6vEBTD', 'UXEhvYcw1xBk259dhqsC', 'g49DNe3zwOUBMXRLtEKV'];
+                                    if (currentLanguage === 'zh' && defaultChineseIds.includes(voice.voice_id)) {
+                                        option.selected = true;
+                                    }
+                                    
+                                    selectElement.appendChild(option);
+                                }
+                            } else if (isEnglishAvatars) {
+                                // For English, we're starting fresh so add all options
+                                const option = document.createElement('option');
+                                option.value = voice.voice_id;
+                                option.textContent = voice.name;
+                                option.dataset.language = 'en';
+                                
+                                // Set Rachel as the default for English
+                                if (currentLanguage === 'en' && (index === 0 || voice.voice_id === '21m00Tcm4TlvDq8ikWAM')) {
+                                    option.selected = true;
+                                }
+                                
+                                selectElement.appendChild(option);
+                            }
+                        }
+                    });
+                    
+                    // Add click event listeners to avatars
+                    attachAvatarListeners(avatarsContainer, selectElement);
+                }
+                
+                // Helper to determine gender from voice name
+                function determineGender(name) {
+                    const femaleNames = ['rachel', 'emily', 'elli', 'bella', 'domi', 'sarah', 'anna', 'grace', 'lily'];
+                    const maleNames = ['adam', 'dave', 'thomas', 'josh', 'james', 'michael', 'sam', 'joseph'];
+                    
+                    name = name.toLowerCase();
+                    
+                    for (const femaleName of femaleNames) {
+                        if (name.includes(femaleName)) {
+                            return 'female';
+                        }
+                    }
+                    
+                    for (const maleName of maleNames) {
+                        if (name.includes(maleName)) {
+                            return 'male';
+                        }
+                    }
+                    
+                    // Default gender if not determined
+                    return Math.random() > 0.5 ? 'male' : 'female';
+                }
+                
+                // Create a voice avatar element
+                function createVoiceAvatar(voiceId, name, gender) {
+                    const avatarDiv = document.createElement('div');
+                    avatarDiv.className = 'voice-avatar';
+                    avatarDiv.dataset.voiceId = voiceId;
+                    
+                    const avatarImg = document.createElement('div');
+                    avatarImg.className = `avatar-img ${gender}`;
+                    
+                    // Use either male or female SVG
+                    avatarImg.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <div class="lip-animation"></div>
+                    `;
+                    
+                    // Set Rachel as active by default
+                    if (voiceId === '21m00Tcm4TlvDq8ikWAM') {
+                        avatarImg.classList.add('active');
+                    }
+                    
+                    const avatarName = document.createElement('div');
+                    avatarName.className = 'avatar-name';
+                    avatarName.textContent = name;
+                    
+                    avatarDiv.appendChild(avatarImg);
+                    avatarDiv.appendChild(avatarName);
+                    
+                    return avatarDiv;
+                }
+                
+                // Attach click event listeners to avatars
+                function attachAvatarListeners(container, selectElement) {
+                    const avatars = container.querySelectorAll('.voice-avatar');
+                    
+                    avatars.forEach(avatar => {
+                        avatar.addEventListener('click', () => {
+                            // Update active state visually
+                            avatars.forEach(a => a.querySelector('.avatar-img').classList.remove('active'));
+                            avatar.querySelector('.avatar-img').classList.add('active');
+                            
+                            // Update the hidden select value
+                            selectElement.value = avatar.dataset.voiceId;
+                            
+
+                        });
+                    });
+                }
+                
+                // Populate voice selectors for different sections
+                populateAvatars(document.getElementById('voiceAvatars'), voiceSelector, voiceChatVoices);
+                populateAvatars(document.getElementById('readTextVoiceAvatarsEn'), readTextVoiceSelector, englishVoices);
+                populateAvatars(document.getElementById('readTextVoiceAvatarsZh'), readTextVoiceSelector, chineseVoices);
+            }
+            
+            startRecordingBtn.addEventListener('click', startRecording);
+            stopRecordingBtn.addEventListener('click', stopRecording);
+            sendTextBtn.addEventListener('click', sendTextMessage);
+            
+            // Start recording audio
+            async function startRecording() {
+                if (isProcessing) return;
+                
+                try {
+                    // Check if recording is allowed based on usage limits
+                    const allowed = await checkButtonUsage('record');
+                    if (!allowed) {
+                        updateStatus('You have reached the usage limit for recording', true);
+                        return;
+                    }
+                    
+                    // Increment usage counter
+                    await incrementButtonUsage('record');
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = processAudio;
+                    
+                    audioChunks = [];
+                    mediaRecorder.start();
+                    
+                    startRecordingBtn.disabled = true;
+                    stopRecordingBtn.disabled = false;
+                    recordingIndicator.classList.add('visible');
+                    updateStatus('Recording... Speak now');
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    updateStatus('Could not access microphone. Please check permissions.', true);
+                }
+            }
+            
+            // Stop recording audio
+            function stopRecording() {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    
+                    startRecordingBtn.disabled = false;
+                    stopRecordingBtn.disabled = true;
+                    recordingIndicator.classList.remove('visible');
+                    showLoading('Processing audio...');
+                }
+            }
+            
+            // Process recorded audio
+            async function processAudio() {
+                isProcessing = true;
+                try {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    
+                    // Create form data for the API request
+                    const formData = new FormData();
+                    formData.append('file', audioBlob, 'recording.webm');
+                    
+                    // Transcribe the audio
+                    showLoading('Transcribing audio...');
+                    const transcriptionResponse = await fetch('/api/voice/transcribe', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!transcriptionResponse.ok) throw new Error('Failed to transcribe audio');
+                    
+                    const transcriptionData = await transcriptionResponse.json();
+                    const transcribedText = transcriptionData.text;
+                    
+                    // Add user message to conversation
+                    addMessage('user', transcribedText);
+                    
+                    // Get AI response
+                    await getAIResponse(transcribedText);
+                } catch (error) {
+                    console.error('Error processing audio:', error);
+                    updateStatus('Error processing audio. Please try again.', true);
+                    isProcessing = false;
+                }
+            }
+            
+            // Send text message from input
+            async function sendTextMessage() {
+                if (isProcessing) return;
+                
+                // Check if sending is allowed based on usage limits
+                const allowed = await checkButtonUsage('send');
+                if (!allowed) {
+                    updateStatus('You have reached the usage limit for sending messages', true);
+                    return;
+                }
+                
+                const message = textInput.value.trim();
+                
+                if (message) {
+                    // Increment usage counter
+                    await incrementButtonUsage('send');
+                    
+                    isProcessing = true;
+                    // Add user message to conversation
+                    addMessage('user', message);
+                    
+                    // Clear input
+                    textInput.value = '';
+                    
+                    // Get AI response
+                    await getAIResponse(message);
+                }
+            }
+            
+            // Get AI response from the API
+            async function getAIResponse(message) {
+                try {
+                    showLoading('Getting AI response...');
+                    
+                    const response = await fetch('/api/voice/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message,
+                            conversation_history: conversationHistory,
+                            voice_id: voiceSelector.value 
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to get AI response');
+                    
+                    const data = await response.json();
+                    
+                    // Add AI message to conversation
+                    addMessage('assistant', data.response, data.audio_url);
+                    
+                    // Update status
+                    updateStatus('');
+                    
+                    // Update conversation history
+                    conversationHistory.push({ role: 'user', content: message });
+                    conversationHistory.push({ role: 'assistant', content: data.response });
+                    
+                    // Limit conversation history to last 10 messages
+                    if (conversationHistory.length > 10) {
+                        conversationHistory = conversationHistory.slice(conversationHistory.length - 10);
+                    }
+                } catch (error) {
+                    console.error('Error getting AI response:', error);
+                    updateStatus('Error getting AI response. Please try again.', true);
+                } finally {
+                    isProcessing = false;
+                }
+            }
+            
+            // Add message to conversation UI
+            function addMessage(role, content, audioUrl = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(role === 'user' ? 'user-message' : 'assistant-message');
+                
+                const label = document.createElement('div');
+                label.classList.add('message-label');
+                label.textContent = role === 'user' ? 'You' : 'Assistant';
+                
+                const paragraph = document.createElement('p');
+                paragraph.textContent = content;
+                
+                messageDiv.appendChild(label);
+                messageDiv.appendChild(paragraph);
+                
+                // Add audio player if available
+                if (audioUrl) {
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = audioUrl;
+                    audio.classList.add('audio-player');
+                    messageDiv.appendChild(audio);
+                    
+                    // Auto-play the assistant's response
+                    audio.play().catch(e => console.log('Auto-play prevented:', e));
+                }
+                
+                conversationContainer.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                conversationContainer.scrollTop = conversationContainer.scrollHeight;
+            }
+            
+            // Show loading animation with message
+            function showLoading(message) {
+                statusMessage.innerHTML = '';
+                
+                const loadingSpinner = document.createElement('div');
+                loadingSpinner.classList.add('loading');
+                
+                const messageSpan = document.createElement('span');
+                messageSpan.textContent = message;
+                
+                statusMessage.appendChild(loadingSpinner);
+                statusMessage.appendChild(messageSpan);
+                
+                statusMessage.classList.remove('error-message');
+            }
+            
+            // Show loading animation for read section
+            function showReadStatus(message, isError = false) {
+                // Always clear the status message first
+                readStatusMessage.innerHTML = '';
+                
+                // Reset button text to default
+                readTextBtn.innerHTML = 'Read Text';
+                
+                if (message) {
+                    // Show loading indicator in button for processing messages
+                    if (message.includes('Converting') || message.includes('Loading') || message.includes('Processing')) {
+                        // Add the loading indicator to the Read Text button
+                        readTextBtn.innerHTML = '';
+                        
+                        const loadingSpinner = document.createElement('div');
+                        loadingSpinner.classList.add('loading');
+                        
+                        const messageSpan = document.createElement('span');
+                        messageSpan.textContent = 'Processing...';
+                        
+                        readTextBtn.appendChild(loadingSpinner);
+                        readTextBtn.appendChild(messageSpan);
+                    }
+                    
+                    // Always show all messages below the button
+                    // Create appropriate elements for the status message
+                    const statusContainer = document.createElement('div');
+                    statusContainer.style.display = 'flex';
+                    statusContainer.style.alignItems = 'center';
+                    statusContainer.classList.toggle('error-message', isError);
+                    
+                    // For loading/processing messages, add spinner to the status area too
+                    if (message.includes('Converting') || message.includes('Loading')) {
+                        const statusSpinner = document.createElement('div');
+                        statusSpinner.classList.add('loading');
+                        statusSpinner.style.marginRight = '8px';
+                        statusContainer.appendChild(statusSpinner);
+                    }
+                    
+                    const messageText = document.createElement('span');
+                    messageText.textContent = message;
+                    statusContainer.appendChild(messageText);
+                    
+                    readStatusMessage.appendChild(statusContainer);
+                    readStatusMessage.style.display = 'flex';
+                } else {
+                    // Hide the status message if empty
+                    readStatusMessage.style.display = 'none';
+                }
+                
+                // Apply error styling if needed
+                if (isError) {
+                    readStatusMessage.classList.add('error-message');
+                } else {
+                    readStatusMessage.classList.remove('error-message');
+                }
+            }
+            
+            // Update status message
+            function updateStatus(message, isError = false) {
+                statusMessage.innerHTML = '';
+                
+                if (message) {
+                    statusMessage.textContent = message;
+                }
+                
+                if (isError) {
+                    statusMessage.classList.add('error-message');
+                } else {
+                    statusMessage.classList.remove('error-message');
+                }
+            }
+            
+            // Visitor tracking and button usage limitation functions
+            
+            // Track visitor on page load
+            async function trackVisitor() {
+                try {
+                    const response = await fetch('/api/voice/track-visitor', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            totalVisitorsElement.textContent = data.total_visitors || 0;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error tracking visitor:', error);
+                }
+            }
+            
+            // Get overall usage statistics
+            async function getUsageStats() {
+                try {
+                    const response = await fetch('/api/voice/stats');
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        totalVisitorsElement.textContent = data.total_visitors || 0;
+                        const totalUses = (data.total_record_uses || 0) + 
+                                         (data.total_send_uses || 0) + 
+                                         (data.total_read_uses || 0);
+                        totalUsesElement.textContent = totalUses;
+                    }
+                } catch (error) {
+                    console.error('Error getting usage stats:', error);
+                }
+            }
+            
+            // Check if a button's usage limit is reached
+            async function checkButtonUsage(buttonType) {
+                try {
+                    const response = await fetch(`/api/voice/check-button-usage/${buttonType}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateButtonUsageUI(buttonType, data.allowed, data.remaining);
+                        
+                        // Store remaining count
+                        if (buttonType === 'record') {
+                            recordButtonRemaining = data.remaining;
+                        } else if (buttonType === 'send') {
+                            sendButtonRemaining = data.remaining;
+                        } else if (buttonType === 'read') {
+                            readButtonRemaining = data.remaining;
+                        }
+                        
+                        return data.allowed;
+                    }
+                    return true; // Default to allowed if API call fails
+                } catch (error) {
+                    console.error(`Error checking ${buttonType} button usage:`, error);
+                    return true; // Default to allowed if API call fails
+                }
+            }
+            
+            // Increment a button's usage count
+            async function incrementButtonUsage(buttonType) {
+                try {
+                    const response = await fetch(`/api/voice/increment-button-usage/${buttonType}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            updateButtonUsageUI(buttonType, data.remaining > 0, data.remaining);
+                            
+                            // Store remaining count
+                            if (buttonType === 'record') {
+                                recordButtonRemaining = data.remaining;
+                            } else if (buttonType === 'send') {
+                                sendButtonRemaining = data.remaining;
+                            } else if (buttonType === 'read') {
+                                readButtonRemaining = data.remaining;
+                            }
+                            
+                            // Refresh total usage stats
+                            getUsageStats();
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error incrementing ${buttonType} button usage:`, error);
+                }
+            }
+            
+            // Update the UI to reflect button usage
+            function updateButtonUsageUI(buttonType, allowed, remaining) {
+                let limitElement, button;
+                
+                if (buttonType === 'record') {
+                    limitElement = recordLimitElement;
+                    button = startRecordingBtn;
+                } else if (buttonType === 'send') {
+                    limitElement = sendLimitElement;
+                    button = sendTextBtn;
+                } else if (buttonType === 'read') {
+                    limitElement = readLimitElement;
+                    button = readTextBtn;
+                } else {
+                    return;
+                }
+                
+                // Update the count display
+                const countElement = limitElement.querySelector('.count');
+                if (countElement) {
+                    countElement.textContent = 5 - remaining;
+                }
+                
+                // Update the styling based on remaining usage
+                if (!allowed || remaining <= 0) {
+                    limitElement.classList.add('limited');
+                    if (button) {
+                        button.disabled = true;
+                        button.title = 'You have reached the usage limit for this feature';
+                    }
+                } else {
+                    limitElement.classList.remove('limited');
+                    if (button) {
+                        button.disabled = false;
+                        button.title = '';
+                    }
+                }
+            }
+            
+            // Text input Enter key handler
+            textInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendTextMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
