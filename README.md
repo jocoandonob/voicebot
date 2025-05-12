@@ -1,5 +1,8 @@
 # Voice AI Assistant
 
+![Voice AI Assistant1](thumb1.png)
+![Voice AI Assistant2](thumb2.png)
+
 A powerful Voice AI application that combines speech-to-text, large language model conversation, and text-to-speech capabilities to create a responsive voice assistant.
 
 ## Features
